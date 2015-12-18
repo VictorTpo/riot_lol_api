@@ -1,30 +1,19 @@
 module RiotLolApi
   module Model
-    class Mastery
+    class Mastery < OpenStruct
 
-      def initialize(options = {})
-        options.each do |key, value|
-          self.class.send(:attr_accessor, key.to_sym)
-          instance_variable_set("@#{key}", value)
-        end
-      end
-
-      def infos data = nil, locale = 'fr_FR'
-        if data.nil?
-          data = {:locale => locale}
-        else
-          data.merge!({:locale => locale})
-        end
-
+      def infos(data = nil, locale = 'fr_FR')
+        build_data(data)
         # hack : set region by default euw
-        response = Client.get("static-data/euw/v1.2/mastery/#{@id}","global",data)
-        unless response.nil?
-          RiotLolApi::Model::Mastery.new(response.to_symbol)
-        else
-          nil
-        end
+        response = Client.get("static-data/euw/v1.2/mastery/#{id}","global",data)
+        return RiotLolApi::Model::Mastery.new(response.to_symbol) if response.present?
+        nil
       end
-
+      
+      def build_data(data)
+        return {locale: locale} if data.nil?
+        data.merge!({locale: locale})
+      end
     end
   end
 end
